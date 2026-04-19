@@ -25,14 +25,23 @@ jobs:
       - name: Install buildozer
         run: |
           pip install buildozer cython
+          buildozer init
+      
+      - name: Accept Android SDK licenses
+        run: |
+          mkdir -p ~/.android
+          echo "count=0" > ~/.android/repositories.cfg
+          yes | sdkmanager --licenses || true
       
       - name: Build APK
-        run: buildozer android debug
+        run: |
+          buildozer android debug
+        env:
+          ANDROID_SDK_ROOT: /home/runner/.buildozer/android/platform/android-sdk
       
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: atsc-wallet-apk
           path: bin/*.apk
-          compression-level: 0
-          if-no-files-found: error
